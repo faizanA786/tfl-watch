@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "TFL-Watch",
+    "description": "Tracks the predicted time to station for TFL lines",
+    "version": "0.0.1",
+    "permissions": [
+        "alarms",
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "arrivals.js"
+    }
+}
