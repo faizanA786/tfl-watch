@@ -1,15 +1,20 @@
 //background script
 
-async function main(naptanID) {
-    chrome.alarms.create("updateTrains",{periodInMinutes: 0.5});
-
-    function handleAlarm(alarm) {
-        if (alarm.name === "updateTrains") {
-            main(naptanID);
-            console.log("UPDATING")
-        }
+async function getId() {
+    try {
+        const res = await chrome.storage.session.get(["naptanId"])
+        const id = res.naptanId || "910GMANRPK"
+        return id
     }
-    chrome.alarms.onAlarm.addListener(handleAlarm)
+    catch(error) {
+        console.log(error)
+    }
+
+}
+
+async function main() {
+    const naptanID = await getId();
+    console.log(naptanID)
 
     try {
         const url = "https://api.tfl.gov.uk/StopPoint/" + naptanID + "/Arrivals"; //arrival predictions
@@ -57,5 +62,13 @@ async function main(naptanID) {
     }
 }
 
-const id = "910GMANRPK" //manor park rail station naptan ID
-main(id);
+chrome.alarms.create("updateTrains",{periodInMinutes: 0.5});
+
+function handleAlarm(alarm) {
+    if (alarm.name === "updateTrains") {
+        main();
+        console.log("UPDATING")
+    }
+}
+chrome.alarms.onAlarm.addListener(handleAlarm);
+main();
