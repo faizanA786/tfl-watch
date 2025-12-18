@@ -3,7 +3,7 @@
 async function getId() {
     try {
         const res = await chrome.storage.session.get(["naptanId"])
-        const id = res.naptanId || "910GMANRPK"
+        const id = res.naptanId || false
         return id
     }
     catch(error) {
@@ -14,9 +14,18 @@ async function getId() {
 
 async function main() {
     const naptanID = await getId();
+    if (!naptanID) {
+        return
+    }
     console.log(naptanID)
-
+    
     try {
+        const errRes = await chrome.storage.session.get(["error"])
+        const error = errRes.error || false
+        if (error == "invalid" || error == "undefined") {
+            return
+        }
+
         const url = "https://api.tfl.gov.uk/StopPoint/" + naptanID + "/Arrivals"; //arrival predictions
         const res = await fetch(url);
         const data = await res.json();
@@ -44,7 +53,12 @@ async function main() {
             }
         }
 
-        console.log(trains.length)
+        if (trains.length == 0) {
+            chrome.storage.session.set({
+                error: "empty"
+            })
+            return
+        }
         for (let j=0; j<trains.length; j++) {
             console.log(trains[j].destinationName)
             console.log(trains[j].direction)
@@ -70,5 +84,20 @@ function handleAlarm(alarm) {
         console.log("UPDATING")
     }
 }
+
+function handleMessage(msg) {
+    if (msg.type == "trigger" && msg.name == "updateTrains") {
+        console.log("msg validated")
+        main();
+
+        function create() {
+            chrome.alarms.create("updateTrains",{periodInMinutes: 0.5});
+        }
+        chrome.alarms.clear("updateTrains", create) //create alarm AFTER clearing is complete
+    }
+}
+
+chrome.runtime.onMessage.addListener(handleMessage)
 chrome.alarms.onAlarm.addListener(handleAlarm);
+
 main();

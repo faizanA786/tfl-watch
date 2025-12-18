@@ -6,3 +6,11 @@ html, body {
 p {
     font-size: 6vw;
 }
+
+.trains {
+    font-size: 4vw;
+}
+
+#border{
+    visibility: hidden;
+}
