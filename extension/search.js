@@ -1,7 +1,3 @@
-function handleError() {
-    
-}
-
 async function search(searchStr) {
     let mode;
     let data;
@@ -21,12 +17,13 @@ async function search(searchStr) {
             console.log("UNDEFINED MODE")
             return
         }
+
         chrome.storage.session.set({
             error: false
         })
 
-        let res = await fetch("https://api.tfl.gov.uk/StopPoint/Search?query=" + encodeURIComponent(searchStr) + "&modes=" + mode)
-        data = await res.json()
+        const res = await fetch("https://api.tfl.gov.uk/StopPoint/Search?query=" + encodeURIComponent(searchStr) + "&modes=" + mode)
+        const data = await res.json()
         console.log(data)
         if (data.matches.length == 0) {
             chrome.storage.session.set({
@@ -37,18 +34,49 @@ async function search(searchStr) {
             return
         }
 
+        let naptanId;
         if (!data.matches[0].topMostParentId) { //hub
-            let children_res = await fetch("https://api.tfl.gov.uk/StopPoint/" + encodeURIComponent(data.matches[0].id))
-            let children_data = await children_res.json()
+            const hubRes = await fetch("https://api.tfl.gov.uk/StopPoint/" + encodeURIComponent(data.matches[0].id))
+            const hubData = await hubRes.json()
+            console.log(hubData)
 
-            console.log(children_data)
+            let stopPoints = [];
+            for (let i=0; i<hubData.children.length; i++) {
+                const child = hubData.children[i]
+
+                if (child.stopType == "NaptanMetroStation" || "NaptanRailStation") {
+                    if (child.modes.includes(mode)) {
+                        stopPoints.push(child)
+                    }
+                }
+
+            }
+            console.log(stopPoints)
+
+            naptanId = stopPoints[0].naptanId;
+        }
+        else { //normal stopPoint
+            naptanId = data.matches[0].topMostParentId;
+
+            if (mode == "bus") {
+                let directionalNaptans = []
+
+                const busRes = await fetch("https://api.tfl.gov.uk/StopPoint/" + naptanId) //bus mode special query/behaviour
+                const busData = await busRes.json()
+                console.log(busData)
+
+                for (let bus of busData.children) {
+                    directionalNaptans.push(bus.naptanId)
+                }
+                console.log(directionalNaptans)
+            }
+
         }
 
         // for (let i=0; i<data.length; i++) {
         //     console.log(data[i].matches)
         // }
 
-        const naptanId = data.matches[0].topMostParentId
         chrome.storage.session.set({
             "naptanId": naptanId
         })

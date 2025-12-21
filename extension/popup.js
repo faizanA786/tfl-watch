@@ -3,12 +3,14 @@ async function updateFrontend() {
     try {
         const errRes = await chrome.storage.session.get(["error"])
         const error = errRes.error || false
-        for (let i=0; i<3; i++) {
-            document.getElementById(i + "a").innerHTML = ""
+
+        if (error) {
+            for (let i=0; i<3; i++) {
+                document.getElementById(i + "a").innerHTML = ""
+                document.getElementById(i + "b").innerHTML = ""
+            }
         }
-        for (let i=0; i<3; i++) {
-            document.getElementById(i + "b").innerHTML = ""
-        }
+
 
         if (error == "undefined") {
             document.getElementById("border").style.visibility = "hidden"

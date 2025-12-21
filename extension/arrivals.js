@@ -26,9 +26,10 @@ async function main() {
             return
         }
 
-        const url = "https://api.tfl.gov.uk/StopPoint/" + naptanID + "/Arrivals"; //arrival predictions
+        const url = "https://api.tfl.gov.uk/StopPoint/" + naptanID  + "/Arrivals"; //arrival predictions
         const res = await fetch(url);
         const data = await res.json();
+        // console.log(data)
         
         let trains = []
         let outboundCount = 0;
@@ -59,12 +60,12 @@ async function main() {
             })
             return
         }
-        for (let j=0; j<trains.length; j++) {
-            console.log(trains[j].destinationName)
-            console.log(trains[j].direction)
-            console.log(trains[j].expectedArrival) //seconds
-            console.log("\n")
-        }
+        // for (let j=0; j<trains.length; j++) {
+        //     console.log(trains[j].destinationName)
+        //     console.log(trains[j].direction)
+        //     console.log(trains[j].expectedArrival) //seconds
+        //     console.log("\n")
+        // }
 
         chrome.storage.session.set({
             arrivals: trains //store array
