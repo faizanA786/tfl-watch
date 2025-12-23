@@ -9,12 +9,12 @@ async function search(searchStr) {
                 break;
             }
         }
-        if (mode == null) {
+        if (mode == null || searchStr == "") {
             chrome.storage.session.set({
                 error: "undefined"
             })
 
-            console.log("UNDEFINED MODE")
+            console.log("UNDEFINED")
             return
         }
 
@@ -22,6 +22,7 @@ async function search(searchStr) {
             error: false
         })
 
+        //searching
         const res = await fetch("https://api.tfl.gov.uk/StopPoint/Search?query=" + encodeURIComponent(searchStr) + "&modes=" + mode)
         const data = await res.json()
         console.log(data)
@@ -59,18 +60,23 @@ async function search(searchStr) {
             naptanId = data.matches[0].topMostParentId;
 
             if (mode == "bus") {
-                let directionalNaptans = []
-
                 const busRes = await fetch("https://api.tfl.gov.uk/StopPoint/" + naptanId) //bus mode special query/behaviour
                 const busData = await busRes.json()
                 console.log(busData)
 
-                for (let bus of busData.children) {
-                    directionalNaptans.push(bus.naptanId)
+                if (busData.children.length == 0) {
+                    naptanId = [busData.naptanId]
                 }
-                console.log(directionalNaptans)
-            }
+                else {
+                    let directionalNaptans = []
+                    for (let bus of busData.children) {
+                        directionalNaptans.push(bus.naptanId)
+                    }
+                    console.log(directionalNaptans)
 
+                    naptanId = directionalNaptans
+                }
+            }
         }
 
         // for (let i=0; i<data.length; i++) {
