@@ -10,17 +10,33 @@
 </head>
 <body>
     <header>
-        <h1>TFL Watch</h1>
+        <div class="info">
+            <h1><b>TFL Watch</b></h1>
+            <nav>
+                <a href="">Terms</a>
+                <a href="https://github.com/faizanA786/tfl-watch" target="_blank">Source</a>
+            </nav>
+        </div>
         <form id="searchForm">
-            <input id="searchInput" type="search" placeholder="Search Station">
+            <div class="search">
+                <input id="searchInput" type="search" placeholder="Search Station">
+
+                <select name="mode" id="mode">
+                    <option value="" selected disabled>Mode</option>
+                    <option value="tube">Tube</option>
+                    <option value="elizabeth-line">Elizabeth Line</option>
+                    <option value="bus">Bus</option>
+                </select>
+            </div>
+
             <button type="submit">Submit</button>
 
             <br>
-            <input type="radio" name="mode" value="tube">Tube
+            <!-- <input type="radio" name="mode" value="tube">Tube
             <input type="radio" name="mode" value="elizabeth-line">Elizabeth Line
-            <input type="radio" name="mode" value="bus">Bus
+            <input type="radio" name="mode" value="bus">Bus -->
+
         </form>
-        <hr>
     </header>
 
     <main id="main">

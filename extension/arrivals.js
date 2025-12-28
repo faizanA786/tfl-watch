@@ -130,6 +130,7 @@ async function main() {
         chrome.storage.session.set({
             arrivals: trains //store array
         })
+        chrome.runtime.sendMessage({type: "trigger", name: "updateFrontend"})
     }
 
     catch (error) {
@@ -148,7 +149,6 @@ function handleAlarm(alarm) {
 
 function handleMessage(msg) {
     if (msg.type == "trigger" && msg.name == "updateTrains") {
-        console.log("msg validated")
         main();
 
         function create() {

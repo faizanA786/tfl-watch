@@ -1,19 +1,22 @@
-
 async function updateFrontend() {
     try {
         const errRes = await chrome.storage.session.get(["error"])
         const error = errRes.error || false
         document.getElementById("main").innerHTML = "";
 
-
         let p = document.getElementById("msg");
         if (!p) {
             p = document.createElement("p")
             p.textContent = "Loading..."
             p.id = "msg";
-            document.body.appendChild(p)
+            document.getElementById("main").appendChild(p)
         }
 
+
+        if (error == "empty") {
+            p.textContent = "Search for a station to see arrival predictions"
+            return
+        }
         if (error == "undefined") {
             p.textContent = "Please choose a mode of transport for this station"
             return
@@ -101,4 +104,11 @@ async function updateFrontend() {
     // }
 }
 
-setInterval(updateFrontend, 1000)
+function handleChange(changes, areaName) {
+    if (areaName == "session" && changes.error || changes.arrivals) {
+        console.log("recieved")
+        updateFrontend();   
+    }
+}
+chrome.storage.onChanged.addListener(handleChange);
+updateFrontend();

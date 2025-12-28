@@ -3,13 +3,22 @@ async function search(searchStr) {
     let data;
 
     try {
-        for (const radio of radios) {
-            if (radio.checked) {
-                mode = radio.value
-                break;
-            }
+        // for (const option of options) {
+        //     if (option.checked) {
+        //         mode = option.value
+        //         break;
+        //     }
+        // }
+        if (searchStr == "") {
+            chrome.storage.session.set({
+                error: "empty"
+            })
+            return
         }
-        if (mode == null || searchStr == "") {
+
+    
+        const mode = options.value;
+        if (mode == "") {
             chrome.storage.session.set({
                 error: "undefined"
             })
@@ -110,4 +119,4 @@ const form = document.getElementById("searchForm")
 form.addEventListener("submit", preventDefault)
 
 const input = document.getElementById("searchInput")
-const radios = document.getElementsByName("mode");
+const options = document.getElementById("mode");
