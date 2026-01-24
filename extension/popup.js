@@ -46,7 +46,7 @@ async function liveArrivals() {
         for (const vehicle of arrivals) {
             const p = document.createElement("p")
             const minuteStr = vehicle.expectedArrival.split("T")[1].substring(0, 5);
-            p.innerHTML = (elizabethLine ? "" : "<b>" + vehicle.lineName + "</b>" + "<br>") + vehicle.destinationName + "<br>" + "Expected: " + minuteStr;
+            p.innerHTML = (elizabethLine ? "" : "<b>" + vehicle.lineName + "</b>" + "<br>") + "To: " + vehicle.destinationName + "<br>" + "Expected: " + minuteStr;
 
             main.appendChild(p)
             main.appendChild(document.createElement("br"))
@@ -62,7 +62,6 @@ async function liveArrivals() {
 
 async function getDisruptions() {
     try{ 
-        console.log("sending")
         const response = await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
 
         const res = await chrome.storage.session.get(["disruptions"])
@@ -102,7 +101,6 @@ function handleFeature() {
     const arrivalsForm = document.getElementById("searchForm")
 
     const feature = features.value;
-    console.log(feature)
     if (feature == "arrivals") {
         arrivalsForm.style.display = "flex"
         liveArrivals();
@@ -116,3 +114,10 @@ function handleFeature() {
 const features = document.getElementById("feature")
 features.addEventListener("change", handleFeature)
 handleFeature();
+
+function handleChange(changes, areaName) { //arrivals have been updated or error
+    if (areaName == "session" && changes.error || changes.arrivals) {
+        liveArrivals();   
+    }
+}
+chrome.storage.onChanged.addListener(handleChange);

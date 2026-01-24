@@ -94,7 +94,6 @@ async function search(searchStr) {
         })
 
         console.log("naptan id: " + naptanId)
-        console.log("done")
 
         chrome.runtime.sendMessage({type: "trigger", name: "updateTrains"})
     }
