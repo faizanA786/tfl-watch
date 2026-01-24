@@ -1,5 +1,3 @@
-//background script
-
 async function getId() {
     try {
         const res = await chrome.storage.session.get(["naptanId"])
@@ -18,7 +16,7 @@ function sortByTime(a, b) {
     return timeA - timeB; //ascending order 
 }  
 
-async function main() {
+export async function main() {
     const naptanID = await getId();
     let bus = false;
     if (!naptanID) {
@@ -46,11 +44,11 @@ async function main() {
 
                 let busCount = 0;
                 for (let i=0; i<data.length; i++) {
-                    if (busCount < 3) {
+                    if (busCount < 6) {
                         buses.push(data[i])
                         busCount++;
                     }
-                    else if (busCount >= 3) {
+                    else if (busCount >= 6) {
                         break;
                     }
                 }
@@ -130,35 +128,10 @@ async function main() {
         chrome.storage.session.set({
             arrivals: trains //store array
         })
-        chrome.runtime.sendMessage({type: "trigger", name: "updateFrontend"})
+        // chrome.runtime.sendMessage({type: "trigger", name: "updateFrontend"})
     }
 
     catch (error) {
         console.log(error)
     }
 }
-
-chrome.alarms.create("updateTrains",{periodInMinutes: 0.5});
-
-function handleAlarm(alarm) {
-    if (alarm.name === "updateTrains") {
-        main();
-        console.log("UPDATING")
-    }
-}
-
-function handleMessage(msg) {
-    if (msg.type == "trigger" && msg.name == "updateTrains") {
-        main();
-
-        function create() {
-            chrome.alarms.create("updateTrains",{periodInMinutes: 0.5});
-        }
-        chrome.alarms.clear("updateTrains", create) //create alarm AFTER clearing is complete
-    }
-}
-
-chrome.runtime.onMessage.addListener(handleMessage)
-chrome.alarms.onAlarm.addListener(handleAlarm);
-
-main();

@@ -1,4 +1,4 @@
-async function updateFrontend() {
+async function liveArrivals() {
     try {
         const errRes = await chrome.storage.session.get(["error"])
         const error = errRes.error || false
@@ -14,7 +14,7 @@ async function updateFrontend() {
 
 
         if (error == "empty") {
-            p.textContent = "Search for a station to see arrival predictions"
+            p.textContent = "This mode of transport is not currently operating at this station."
             return
         }
         if (error == "undefined") {
@@ -23,10 +23,6 @@ async function updateFrontend() {
         }
         else if (error == "invalid") {
             p.textContent = "This station was not found with the chosen mode of transport."
-            return
-        }
-        else if (error == "empty") {
-            p.textContent = "This mode of transport is not currently operating at this station."
             return
         }
 
@@ -38,77 +34,85 @@ async function updateFrontend() {
         }
         p.remove()
 
-        let sectionCount = 0;
-        let section = []
         const main = document.getElementById("main");
+
+        const resMode = await chrome.storage.session.get(["mode"]);
+        const mode = resMode.mode
+        let elizabethLine = false;
+        if (mode == "elizabeth-line") {
+            elizabethLine = true
+        }
+
         for (const vehicle of arrivals) {
             const p = document.createElement("p")
             const minuteStr = vehicle.expectedArrival.split("T")[1].substring(0, 5);
-            p.innerHTML = "[" + vehicle.lineName + "]" + "<br>" + vehicle.destinationName + "<br>" + "Expected: " + minuteStr;
+            p.innerHTML = (elizabethLine ? "" : "<b>" + vehicle.lineName + "</b>" + "<br>") + vehicle.destinationName + "<br>" + "Expected: " + minuteStr;
 
-            section.push(p)
-            sectionCount++;
-
-            if (sectionCount >= 3) {
-                const border = document.createElement("hr")
-                for (const p of section) {
-                    main.appendChild(p)
-                }
-                main.appendChild(border)
-                section = []
-                sectionCount = 0;
-            }
+            main.appendChild(p)
+            main.appendChild(document.createElement("br"))
 
         }
 
-        // document.getElementById("border").style.visibility = "visible";
-
-        // let inboundTrains = [];
-        // let outboundTrains = [];
-        // for (let train of trains) {
-        //     if (train.direction == "inbound") {
-        //         inboundTrains.push(train)
-        //     }
-        //     else {
-        //         outboundTrains.push(train)
-        //     }
-        // }
-
-        // for (let j=0; j<inboundTrains.length; j++) {
-        //     let minutesStr = inboundTrains[j].expectedArrival.split("T")[1].substring(0, 5);
-        //     document.getElementById(j+"a").innerHTML = inboundTrains[j].destinationName
-        //     document.getElementById(j+"a").innerHTML += " - " + minutesStr
-        // }
-        // for (let j=0; j<outboundTrains.length; j++) {
-        //     let minutesStr = outboundTrains[j].expectedArrival.split("T")[1].substring(0, 5);
-        //     document.getElementById(j+"b").innerHTML = outboundTrains[j].destinationName
-        //     document.getElementById(j+"b").innerHTML += " - " + minutesStr
-        // }
     }
     catch(error) {
         console.log(error)
     }
 
-    // let inboundTrain, outboundTrain;
-    // for (let i=0; i<trains.length; i++) {
-    //     if (inboundTrain == null && trains[i].direction == "inbound") {
-    //         inboundTrain = trains[i]
-    //     }
-    //     if (outboundTrain == null && trains[i].direction == "outbound") {
-    //         outboundTrain = trains[i]
-    //     }
-
-    //     if (inboundTrain && outboundTrain) {
-    //         break;
-    //     }
-    // }
 }
 
-function handleChange(changes, areaName) {
-    if (areaName == "session" && changes.error || changes.arrivals) {
-        console.log("recieved")
-        updateFrontend();   
+async function getDisruptions() {
+    try{ 
+        console.log("sending")
+        const response = await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
+
+        const res = await chrome.storage.session.get(["disruptions"])
+        const disruptions = res.disruptions || false
+        if (!disruptions) {
+            console.log("null disruptions")
+            return
+        }
+
+        for (const disruption of disruptions) {
+            const lineName = disruption.name
+            const status = disruption.lineStatuses[0].statusSeverityDescription
+            let reason = disruption.lineStatuses[0].reason
+            if (status == "Good Service") {
+                continue
+            }
+            reason = reason.substring(reason.indexOf(":") + 1).trim();
+
+            const p = document.createElement("p")
+            p.innerHTML = "<b>" + lineName + "</b>" + "<br>" + reason;
+
+            main.appendChild(p)
+            main.appendChild(document.createElement("br"))
+
+        }
+    }
+    catch(error) {
+        console.log(error)
     }
 }
-chrome.storage.onChanged.addListener(handleChange);
-updateFrontend();
+
+function handleFeature() {
+    chrome.storage.session.set({
+        "naptanId": null,
+    })
+    document.getElementById("main").innerHTML = ""
+    const arrivalsForm = document.getElementById("searchForm")
+
+    const feature = features.value;
+    console.log(feature)
+    if (feature == "arrivals") {
+        arrivalsForm.style.display = "flex"
+        liveArrivals();
+    }
+    else if (feature == "disruptions") {
+        arrivalsForm.style.display = "none"
+        getDisruptions();
+    }
+}
+
+const features = document.getElementById("feature")
+features.addEventListener("change", handleFeature)
+handleFeature();

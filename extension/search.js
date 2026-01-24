@@ -88,12 +88,9 @@ async function search(searchStr) {
             }
         }
 
-        // for (let i=0; i<data.length; i++) {
-        //     console.log(data[i].matches)
-        // }
-
         chrome.storage.session.set({
-            "naptanId": naptanId
+            "naptanId": naptanId,
+            "mode": mode
         })
 
         console.log("naptan id: " + naptanId)
