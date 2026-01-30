@@ -64,8 +64,8 @@ async function getDisruptions() {
     try{ 
         const response = await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
 
-        const res = await chrome.storage.session.get(["disruptions"])
-        const disruptions = res.disruptions || false
+        const res = await chrome.storage.local.get(["disruptionsCache"])
+        const disruptions = res.disruptionsCache.data || false
         if (!disruptions) {
             console.log("null disruptions")
             return
