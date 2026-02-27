@@ -118,17 +118,12 @@ export async function main() {
             })
             return
         }
-        // for (let j=0; j<trains.length; j++) {
-        //     console.log(trains[j].destinationName)
-        //     console.log(trains[j].direction)
-        //     console.log(trains[j].expectedArrival) //seconds
-        //     console.log("\n")
-        // }
+
+        console.log(trains)
 
         chrome.storage.session.set({
-            arrivals: trains //store array
+            arrivals: trains, //store array
         })
-        // chrome.runtime.sendMessage({type: "trigger", name: "updateFrontend"})
     }
 
     catch (error) {

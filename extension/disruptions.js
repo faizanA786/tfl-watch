@@ -2,6 +2,7 @@ async function getCachedDisruptions() {
     try {
         const res = await chrome.storage.local.get(["disruptionsCache"])
         const data = res.disruptionsCache?.data || false
+        console.log(data)
         const time = res.disruptionsCache?.time || false
         if (!data || !time) {
             return false //missing cache
@@ -25,7 +26,7 @@ export async function disruptions() {
     }
 
     try {
-        const res = await fetch("https://api.tfl.gov.uk/Line/Mode/tube,overground,elizabeth-line,dlr,tram/Status")
+        const res = await fetch("https://api.tfl.gov.uk/Line/Mode/tube,overground,elizabeth-line,dlr/Status")
         const data = await res.json()
         const time = Date.now()
         console.log(data)

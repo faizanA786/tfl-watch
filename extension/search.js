@@ -67,6 +67,14 @@ async function search(searchStr) {
         }
         else { //normal stopPoint
             naptanId = data.matches[0].topMostParentId;
+            await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
+
+            // const res = await chrome.storage.local.get(["disruptionsCache"])
+            // const disruptions = res.disruptionsCache.data || false
+            // if (!disruptions) {
+            //     console.log("null disruptions")
+            //     return
+            }
 
             if (mode == "bus") {
                 const busRes = await fetch("https://api.tfl.gov.uk/StopPoint/" + naptanId) //bus mode special query/behaviour
@@ -86,13 +94,18 @@ async function search(searchStr) {
                     naptanId = directionalNaptans
                 }
             }
-        }
+        
+
+        // chrome.storage.session.set({
+        //     "naptanId": naptanId,
+        //     "mode": mode,
+        //     "coords": {lat: data.matches[0].lat, lon: data.matches[0].lon} //for use with recommendations
+        // })
 
         chrome.storage.session.set({
             "naptanId": naptanId,
-            "mode": mode
+            "mode": mode,
         })
-
         console.log("naptan id: " + naptanId)
 
         chrome.runtime.sendMessage({type: "trigger", name: "updateTrains"})

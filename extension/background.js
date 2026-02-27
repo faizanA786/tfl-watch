@@ -35,3 +35,4 @@ function handleMessage(msg, sender, sendResponse) {
 
 chrome.runtime.onMessage.addListener(handleMessage)
 chrome.alarms.onAlarm.addListener(handleAlarms);
+disruptions()

@@ -62,7 +62,7 @@ async function liveArrivals() {
 
 async function getDisruptions() {
     try{ 
-        const response = await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
+        await chrome.runtime.sendMessage({type: "trigger", name: "getDisruptions"})
 
         const res = await chrome.storage.local.get(["disruptionsCache"])
         const disruptions = res.disruptionsCache.data || false
